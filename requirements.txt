@@ -1,0 +1,12 @@
+yt-dlp
+librosa
+pandas
+moviepy
+numpy
+opencv-python
+tqdm
+transformers
+torch
+Pillow
+openai-whisper
+safetensors

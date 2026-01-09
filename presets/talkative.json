@@ -1,0 +1,27 @@
+{
+    "description": "Conversation focus. Prioritizes chat interaction and speech emotion (Whisper).",
+    "weights": {
+        "audio_rms": 0.1,
+        "audio_slope": 0.1,
+        "audio_zcr": 0.1,
+        "chat_velocity": 0.4,
+        "visual_clip": 0.1,
+        "whisper_emotion": 0.2
+    },
+    "thresholds": {
+        "rms_min_db": 1.2,
+        "chat_percentile": 0.85,
+        "final_raw_min": 0.4,
+        "clamped_max_score": 4.0
+    },
+    "prompts": {
+        "llava": "This is a livestream candidate for YouTube Shorts or Highlights. Answer YES or NO only. Is the HUMAN telling a joke, reacting to chat, or telling an interesting story? Focus on facial expressions of amusement or surprise."
+    },
+    "parameters": {
+        "stage1_top_k": 350,
+        "stage2_top_k": 80,
+        "stage3_top_k": 30,
+        "soft_threshold_score": 0.7,
+        "merge_gap_seconds": 180
+    }
+}

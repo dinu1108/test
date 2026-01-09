@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+venv_310/
+.env
+
+# Media Files (Aggressive)
+*.mp4
+*.wav
+*.mp3
+*.m4a
+*.mkv
+*.mov
+*.jpg
+*.png
+*.webm
+
+# Project Data Directories
+clips/
+processed/
+raw_data/
+training_center/
+learner_tmp/
+
+# Editor Temp Files
+concat.txt
+concat_list.txt
+temp_*.mp4
+
+# VS Code
+.vscode/
+
+# Keep presets visible
+!presets/*.json

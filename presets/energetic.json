@@ -1,0 +1,27 @@
+{
+    "description": "High energy focus. Prioritizes loud screams (RMS/ZCR) and rapid chat velocity.",
+    "weights": {
+        "audio_rms": 0.25,
+        "audio_slope": 0.25,
+        "audio_zcr": 0.2,
+        "chat_velocity": 0.2,
+        "visual_clip": 0.1,
+        "whisper_emotion": 0.05
+    },
+    "thresholds": {
+        "rms_min_db": 1.5,
+        "chat_percentile": 0.90,
+        "final_raw_min": 0.5,
+        "clamped_max_score": 5.0
+    },
+    "prompts": {
+        "llava": "This is a livestream candidate for YouTube Shorts or Highlights. Answer YES or NO only. Is the HUMAN reacting with enough emotional intensity or visual impact to be considered a 'Viral Highlight'? Ignore game characters. Focus on high-energy facial expressions and gestures (screaming, laughing, jumping)."
+    },
+    "parameters": {
+        "stage1_top_k": 300,
+        "stage2_top_k": 80,
+        "stage3_top_k": 25,
+        "soft_threshold_score": 0.8,
+        "merge_gap_seconds": 300
+    }
+}

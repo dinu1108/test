@@ -1,0 +1,27 @@
+{
+    "description": "Gameplay focus. Prioritizes visual clarity and balanced reaction metrics.",
+    "weights": {
+        "audio_rms": 0.15,
+        "audio_slope": 0.15,
+        "audio_zcr": 0.05,
+        "chat_velocity": 0.15,
+        "visual_clip": 0.5,
+        "whisper_emotion": 0.0
+    },
+    "thresholds": {
+        "rms_min_db": 1.2,
+        "chat_percentile": 0.90,
+        "final_raw_min": 0.6,
+        "clamped_max_score": 5.0
+    },
+    "prompts": {
+        "llava": "This is a livestream candidate for YouTube Shorts or Highlights. Answer YES or NO only. Is this an intense gameplay moment OR a human reaction to a game event? Focus on concentration, surprise, or victory celebration."
+    },
+    "parameters": {
+        "stage1_top_k": 250,
+        "stage2_top_k": 80,
+        "stage3_top_k": 20,
+        "soft_threshold_score": 0.85,
+        "merge_gap_seconds": 400
+    }
+}
