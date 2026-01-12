@@ -30,6 +30,8 @@ def main():
     parser = argparse.ArgumentParser(description="Auto Highlight Extractor (Hybrid AI)")
     parser.add_argument("url", help="YouTube URL to process")
     parser.add_argument("--style", default="energetic", help="Editing Style: energetic (default), talkative, skillful")
+    parser.add_argument("--start", help="Start time (e.g., 00:00 or 10:00)")
+    parser.add_argument("--end", help="End time (e.g., 01:00 or 11:30)")
     args = parser.parse_args()
 
     # 1. Load Preset
@@ -46,7 +48,10 @@ def main():
     try:
         # Step 1: Download
         print(">> [1/4] Downloading Video & Chat...")
-        video_path, audio_path, chat_path = analyst.download_video(args.url)
+        if args.start and args.end:
+            print(f"[{args.style}] Target Section: {args.start} ~ {args.end}")
+            
+        video_path, audio_path, chat_path = analyst.download_video(args.url, start=args.start, end=args.end)
         if not video_path:
             print("[Error] Download failed.")
             return
@@ -61,7 +66,8 @@ def main():
 
         # Step 3: Edit
         print(f"\n>> [3/4] Editing {len(highlights)} Sequences...")
-        editor.create_full_recap(video_path, highlights, style_name=args.style)
+        config['style_name'] = args.style
+        editor.create_full_recap(video_path, highlights, style_config=config)
 
         print("\n>> [4/4] Process Complete! Check 'clips' folder.")
 

@@ -1,0 +1,21 @@
+{
+    "description": "Learned from Khan_[\ub3d9\uc218\uce78TV] \uc2a4\ud398\uc778\uc5d0\uc11c \uac00\uc7a5 \uace0\ub9bd\ub410\uc9c0\ub9cc \uac00\uc7a5 \uc790\uc720\ub85c\uc6b4 \ucd95\uad6c \ud074\ub7fd \u02dd\ud14c\ub124\ub9ac\ud398 CD\u02dd l \ud3a8\ud50c\ub9ad\uc2a4 EP.1 (nefLhScHPb0). The streamer appears to be reacting with a surprised or questioning expression while analyzing the content on the screen, which includes a website with text, images, and possibly social media feeds.",
+    "weights": {
+        "audio_rms": 0.2,
+        "audio_slope": 0.4,
+        "audio_zcr": 0.1,
+        "chat_velocity": 0.2,
+        "visual_clip": 0.2
+    },
+    "thresholds": {
+        "rms_min_db": 1.2,
+        "clamped_max_score": 5.0
+    },
+    "parameters": {
+        "stage1_top_k": 300,
+        "merge_gap_seconds": 78
+    },
+    "prompts": {
+        "llava": "This is a highlight similar to: 'The streamer appears to be reacting with a surprised or questioning expression while analyzing the content on the screen, which includes a website with text, images, and possibly social media feeds.'. Is the content engaging in the same way? Answer YES or NO."
+    }
+}

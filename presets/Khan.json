@@ -1,0 +1,24 @@
+{
+    "description": "FM26 Narrative Style - Focus on Build-up and Context. Optimized for coherent storytelling.",
+    "weights": {
+        "audio_rms": 0.2,
+        "audio_slope": 0.2,
+        "audio_zcr": 0.1,
+        "chat_velocity": 0.3,
+        "visual_state_change": 0.5
+    },
+    "thresholds": {
+        "rms_min_db": 1.2,
+        "clamped_max_score": 5.0
+    },
+    "parameters": {
+        "stage1_top_k": 300,
+        "min_clip_duration": 120,
+        "merge_gap_seconds": 180,
+        "lookback_search_limit": 300
+    },
+    "prompts": {
+        "llava": "This is a highlight similar to: 'The streamer appears to be reacting with a surprised or questioning expression while analyzing the content on the screen, which includes a website with text, images, and possibly social media feeds.'. Is the content engaging in the same way? Answer YES or NO.",
+        "narrative_check": "Does this image show a Football Manager tactics screen, team lineup squad list, fixture schedule, or locker room conversation? Answer YES or NO."
+    }
+}

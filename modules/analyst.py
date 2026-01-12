@@ -30,19 +30,27 @@ class Analyst:
         self.STAGE2_TOP_K = self.params.get("stage2_top_k", 80)
         self.FINAL_TOP_K = self.params.get("stage3_top_k", 30)
 
-    def download_video(self, url):
-        try:
-            output_template = str(self.processed_dir / "%(id)s.%(ext)s")
-            cmd = ["yt-dlp", "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4", "--write-sub", "--write-auto-sub", "--sub-lang", "ko,en", "--write-comments", "-o", output_template, url]
-            subprocess.run(cmd, check=True)
-            files = list(self.processed_dir.glob("*.mp4")) # Simple glob for demo
-            if not files: return None, None, None
-            # Find the most recently modified file
-            video_path = max(files, key=os.path.getctime)
-            chat_path = str(video_path).replace(".mp4", ".live_chat.json")
-            if not os.path.exists(chat_path): chat_path = None
-            return str(video_path), None, chat_path
-        except: return None, None, None
+    def download_video(self, url, start=None, end=None):
+        # [NEW] Support Local File Support
+        if os.path.exists(url) and os.path.isfile(url):
+            print(f"[Analyst] 📂 Local File Detected: {url}")
+            # Try to find sidecar chat file? (same name .json)
+            p = Path(url)
+            possible_chat = p.with_suffix('.json')
+            if not possible_chat.exists():
+                possible_chat = p.with_suffix('.live_chat.json')
+            
+            chat_path = str(possible_chat) if possible_chat.exists() else None
+            if chat_path: print(f"[Analyst] Found Sidecar Chat: {chat_path}")
+            
+            return str(url), None, chat_path
+
+        from modules.scraper import GenericDownloader
+        
+        downloader = GenericDownloader(self.processed_dir)
+        video_path, chat_path = downloader.download(url, start_time=start, end_time=end, with_metadata=True)
+        
+        return str(video_path) if video_path else None, None, str(chat_path) if chat_path else None
 
     def _load_clip(self):
         if self.model: return
@@ -82,7 +90,11 @@ class Analyst:
             with open(cache_path, 'wb') as f: pickle.dump(data, f)
             if temp_wav.exists(): temp_wav.unlink()
             return data
-        except: return None
+        except Exception as e:
+            import traceback
+            print(f"[Analyst] ❌ Audio Analysis Error: {e}")
+            traceback.print_exc()
+            return None
 
     def calculate_scores(self, audio_data):
         w_rms = self.weights.get("audio_rms", 0.3)
@@ -159,10 +171,31 @@ class Analyst:
         self._unload_clip()
         return results
 
+    def check_vram(self, required_mb=4000):
+        try:
+            r = subprocess.run(["nvidia-smi", "--query-gpu=memory.free", "--format=csv,noheader,nounits"], capture_output=True, text=True)
+            free = int(r.stdout.strip())
+            print(f"[Analyst] VRAM Free: {free} MB")
+            if free < required_mb:
+                print(f"[Warning] VRAM might be low ({free} MB). Reducing batch size or quality recommended.")
+                return False
+            return True
+        except:
+            print("[Info] NVIDIA-SMI not found or CPU mode.")
+            return True
+
     def run_llava_stage(self, video_path, candidates):
         verified = []
         prompt = self.prompts.get("llava", "Is this a highlight?")
         url = "http://localhost:11434/api/generate"
+        
+        # User Optimization: Limit to Top-20
+        LIMIT = 20
+        if len(candidates) > LIMIT:
+            print(f"[Optimization] Limiting LLaVA check to Top-{LIMIT} (from {len(candidates)})")
+            candidates = candidates[:LIMIT]
+        
+        self.check_vram(required_mb=2000)
         
         print(f"[Analyst] LLaVA Checking {len(candidates)} candidates...")
         for c in tqdm(candidates, desc="LLaVA"):
@@ -182,6 +215,55 @@ class Analyst:
                         verified.append(c)
             except: pass
         return verified
+
+    def find_narrative_start(self, video_path, peak_time):
+        limit = self.params.get("lookback_search_limit", 0)
+        if limit <= 0: return max(0, peak_time - 20) # Default 20s pre-roll
+        
+        print(f"[Analyst] 🕵️ Searching for Narrative Start (Max {limit}s lookback)...")
+        # Search backwards in steps of 30s
+        # If we find a "Context Frame" (Tactics, Lineup), we stop and use that time.
+        
+        prompt = self.prompts.get("narrative_check", "Does this image show a Football Manager tactics screen, team lineup squad list, fixture schedule, or locker room conversation? Answer YES or NO.")
+        url = "http://localhost:11434/api/generate"
+        
+        # Check points: -30, -60, -90 ... up to limit
+        check_points = range(30, limit + 1, 30)
+        found_start = peak_time - 20 # Metric default
+        
+        for lookback in check_points:
+            t = peak_time - lookback
+            if t < 0: break
+            
+            # Extract frame
+            cmd = ["ffmpeg", "-y", "-ss", str(t), "-i", video_path, "-vframes", "1", "-f", "image2", "-c:v", "mjpeg", "pipe:1"]
+            try:
+                r = subprocess.run(cmd, capture_output=True, timeout=5)
+                if len(r.stdout) > 0:
+                    b64 = base64.b64encode(r.stdout).decode('utf-8')
+                    res = requests.post(url, json={"model":"llava", "prompt": prompt, "images":[b64], "stream":False}, timeout=20)
+                    resp_text = res.json().get('response', '').lower()
+                    
+                    if "yes" in resp_text:
+                        print(f"  [Found] Narrative Context at -{lookback}s (Tactics/Squad)")
+                        found_start = t
+                        # We found a hard start, we can stop or keep looking for *earlier* context? 
+                        # Usually the *first* (earliest) relevant context is best. 
+                        # But we are iterating backwards (closer to peak -> further).
+                        # So if we find one at -30, should we check -60?
+                        # Narrative usually implies: [Context] -> [Build up] -> [Event]
+                        # If we find context at -30, let's look a bit further to see if it persists or started earlier?
+                        # For efficiency, let's keep searching but update found_start. 
+                        # If we find context at -120, that's better than -30 if it's the *same* context.
+                        # Let's greedily take the FURTHEST valid context within limit.
+                        continue 
+                    else:
+                        # If we found something earlier (e.g. at -30) and now at -60 it's NOT context (e.g. random gameplay), 
+                        # then -30 was likely the start of the "Context Scene".
+                        pass
+            except: pass
+            
+        return max(0, found_start)
 
     def get_highlights(self, video_path, chat_path=None):
         # 1. Audio Analysis
@@ -225,12 +307,15 @@ class Analyst:
         
         final.sort(key=lambda x: x['time'])
         
-        # Format
+        # Format with Narrative Lookback
         output = []
         for f in final:
+            # Smart Narrative Start
+            narrative_start = self.find_narrative_start(video_path, f['time'])
+            
             output.append({
-                'start': max(0, f['time'] - 60),
-                'end': f['time'] + 120,
+                'start': narrative_start,
+                'end': f['time'] + 10, # Post-roll fixed at 10s as requested
                 'summary': f.get('summary', 'AI Highlight'),
                 'score': f['score']
             })

@@ -1,72 +1,70 @@
-# Auto Highlight Extractor (Preset-Based Hybrid AI)
+# Auto Highlight Extractor (Hybrid AI Factory)
 
-This system is an automated video editing pipeline that extracts high-impact moments from long-form broadcast videos. It features a **Preset-Based Architecture** allowing users to switch between editing styles (Energetic, Talkative, Skillful) and uses a **Hybrid AI Funnel** (Signal Processing -> CLIP -> LLaVA).
+방송 영상학습 기반 자동 하이라이트 추출기입니다.
+**Hybrid AI (Gemini 2.5) + Factory Automation** 아키텍처를 도입하여 18시간 분량의 초대형 영상을 "단 한 번의 호출"로 완벽하게 요약합니다.
 
-## 1. System Pipeline Architecture (Tree View)
+---
+
+## 🏭 Factory Mode (V3) - **Current Standard**
+
+**"Analyst(분석) + LLM(평가) + Golden Score(확정)"**로 이어지는 정밀 공정 시스템입니다.
+
+### 1️⃣ 작동 원리 (The Pipeline)
+
+#### **Step 1: Signal Analysis (Analyst V1)**
+- **역할**: 1차 후보군 신속 추출
+- **방식**: 오디오 파형(RMS, Slope, ZCR)을 분석하여 에너지 피크 상위 15개를 선정합니다.
+- **목적**: LLM 토큰 절약 및 물리적으로 확실한(소리지르는) 구간 확보
+
+#### **Step 2: LLM Precision Evaluation (Gemini 2.5)**
+- **역할**: 정밀 심사 (판사 역할)
+- **방식**: 선정된 15개 후보의 대본을 읽고 다음 4가지 지표(0.0~1.0)를 평가합니다.
+    1.  **emotion_intensity**: 감정 폭발력 (재미)
+    2.  **info_density**: 정보 밀도
+    3.  **context_break**: 맥락 단절 여부 (감점 요인)
+    4.  **is_unnecessary**: 불필요 구간 여부
+- **Constraint**: **새로운 타임라인 생성 금지** (오직 평가만 수행)
+
+#### **Step 3: Golden Score Logic (공장장 공식)**
+- **역할**: 최종 확정 및 튜닝
+- **공식**: `(Base*0.4) + (Emotion*0.4) + (Info*0.2) - (Break*0.2)`
+- **Rule**:
+    - **Threshold**: 최종 점수 **0.55** 이상 통과 (재미 위주 완화)
+    - **Penalty**: 이전 컷과 3초 이상 끊기면 **-0.1점** 감점 (연속성 유도)
+    - **Logging**: 탈락한 컷은 사유와 점수를 `rejection_logs.jsonl`에 기록 (피드백 루프)
+
+#### **Step 4: Fast Production (FFmpeg)**
+- **역할**: 물리적 파일 생성
+- **기능**: Audio Fade In/Out 적용, GPU 가속 렌더링
+
+### 2️⃣ 실행 방법
+```bash
+# 1. API 키 확인 (.env 파일 자동 로드)
+# 2. 공장 가동
+python factory_main.py "raw_data/파일이름.mp4"
+```
+
+---
+
+## 📂 Folder Structure (폴더 구조)
 
 ```text
-[Main Entry: main.py] (CLI: --style energetic)
-|
-|-- ⚙️ Configuration (Preset Injection)
-|   |-- presets/energetic.json (Focus: Scream, Rapid Reaction)
-|   |-- presets/talkative.json (Focus: Chat, Dialogue Emotion)
-|   +-- presets/skillful.json  (Focus: Visual Clarity, Game Events)
-|
-|-- 📂 Ingestion (Data Collection)
-|   |-- yt-dlp: Download Video & Live Chat Data
-|   +-- FFmpeg: Extract Wav & Frames (Parallel)
-|
-|-- 📂 Analysis Stage 1: Advanced Signal Processing (Heuristic)
-|   |-- [Audio] RMS Slope (Onset Speed) + Pitch + ZCR (Screams)
-|   |-- [Chat] Velocity Peaks + Keywords
-|   |-- [Scoring] Clamped Temporal Accumulation (Prevents Score Explosion)
-|   +-- [Filter] Hybrid Threshold (Top-K + Super Highlights)
-|
-|-- 📂 Analysis Stage 2: Visual Screening (CLIP)
-|   |-- Input: Top Candidates from Stage 1
-|   |-- Logic: "Is this a black screen / loading screen?"
-|   +-- Action: Fast Reject (VRAM Optimized)
-|
-|-- 📂 Analysis Stage 3: Deep Verification (LLaVA)
-|   |-- Input: Top 80 Survivors
-|   |-- Prompt: "Is this a Viral Highlight? (Persona-driven)"
-|   +-- Output: Final Verified Highlights with Descriptions
-|
-|-- 📂 Production (Editing & Rendering)
-|   |-- Whisper: Generate Subtitles & Emotion Check
-|   |-- MoviePy: Individual Sequence Rendering (Temp Files)
-|   +-- FFmpeg: Stream Copy Concat (No Re-encoding)
-|
-+-- 🎬 Output: [VideoName]_FINAL_RECAP.mp4
+auto_highlight_extractor/
+├── factory_main.py        # [V3] 공장 모드 실행 (★Main)
+├── main_v2.py             # [V2] 대화형 에이전트 실행
+├── main.py                # [V1] 로컬 모드 실행
+├── .env                   # [보안] API 키 저장소
+│
+├── hybrid_agent_v2/       # [Core] 하이브리드 엔진
+│   ├── llm_interface.py   # Gemini 2.5 평가자 (Score & Reason)
+│   ├── fast_cutter.py     # FFmpeg 렌더링
+│   ├── knowledge_base.py  # ChromaDB & Rejection Logging
+│   └── chroma_db/         # [Log] rejection_logs.jsonl (실패 기록)
+│
+├── modules/               # [Module] 기능 모듈
+│   ├── analyst.py         # [Signal] V1 오디오 분석기
+│   ├── dinu_test/         # [Ext] 외부 테스트 모듈 (git clone)
+│   └── collector.py       # 다운로더
+│
+└── clips/                 # [Result] 결과물이 저장되는 곳
 ```
-
-## 2. Usage & Styles
-
-Run the extractor with a specific style preset:
-
-```bash
-# 1. Energetic (Default) - Best for Horror Games, Action
-python main.py https://youtu.be/VideoURL --style energetic
-
-# 2. Talkative - Best for Just Chatting, Talk Shows
-python main.py https://youtu.be/VideoURL --style talkative
-
-# 3. Skillful - Best for competitive Gameplay
-python main.py https://youtu.be/VideoURL --style skillful
-```
-
-## 3. Core Technologies
-
-| Feature | Tech | Description |
-| :--- | :--- | :--- |
-| **Onset Detection** | `Librosa` | Uses **RMS Slope** (Derivative) to detect the exact moment a reaction starts, not just when it is loud. |
-| **Clamping** | `Numpy` | **Temporal Accumulation** adds up scores over time but is clamped to a Max Score to prevent long loud noise from dominating. |
-| **Persona AI** | `LLaVA` | The AI is prompted with a specific persona ("You are a YouTube Shorts Editor") to judge entertainment value. |
-| **Hybrid Filter** | `Logic` | Combines **Top-N** (Relative) and **Soft Threshold** (Absolute) to ensure "super highlights" are never missed even in busy streams. |
-| **Fast Render** | `FFmpeg` | **Divide & Concat** strategy renders clips individually to avoid memory leaks, then merges instantly. |
-
-## 4. Requirements
-*   Python 3.10+
-*   NVIDIA GPU (CUDA)
-*   Ollama (running `llava`) at `localhost:11434`
-*   FFmpeg & ImageMagick installed and on shared paths.

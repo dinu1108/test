@@ -1,0 +1,21 @@
+{
+    "description": "Learned from Khan_[\ub3d9\uc218\uce78TV] \ub0b4 \uc12c\uc5d0\uc11c \ub098\uac00!!!!!!! \u3163\ud3a8\ud50c\ub9ad\uc2a4 EP.2 (PI_yLeg3SS4). The streamer appears to be engaged with their content, as they are actively interacting with it through typing on a website, which suggests an active presence and involvement in the discussion or event being displayed.",
+    "weights": {
+        "audio_rms": 0.2,
+        "audio_slope": 0.4,
+        "audio_zcr": 0.1,
+        "chat_velocity": 0.2,
+        "visual_clip": 0.2
+    },
+    "thresholds": {
+        "rms_min_db": 1.2,
+        "clamped_max_score": 5.0
+    },
+    "parameters": {
+        "stage1_top_k": 300,
+        "merge_gap_seconds": 78
+    },
+    "prompts": {
+        "llava": "This is a highlight similar to: 'The streamer appears to be engaged with their content, as they are actively interacting with it through typing on a website, which suggests an active presence and involvement in the discussion or event being displayed.'. Is the content engaging in the same way? Answer YES or NO."
+    }
+}

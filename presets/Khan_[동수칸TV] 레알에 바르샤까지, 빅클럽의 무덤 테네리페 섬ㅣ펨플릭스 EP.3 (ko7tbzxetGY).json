@@ -1,0 +1,21 @@
+{
+    "description": "Learned from Khan_[\ub3d9\uc218\uce78TV] \ub808\uc54c\uc5d0 \ubc14\ub974\uc0e4\uae4c\uc9c0, \ube45\ud074\ub7fd\uc758 \ubb34\ub364 \ud14c\ub124\ub9ac\ud398 \uc12c\u3163\ud3a8\ud50c\ub9ad\uc2a4 EP.3 (ko7tbzxetGY). The streamer seems to be engrossed in the content, possibly from a Korean news source, with minimal visible reactions, focusing on displaying the news or social media page they are looking at on their screen.",
+    "weights": {
+        "audio_rms": 0.2,
+        "audio_slope": 0.4,
+        "audio_zcr": 0.1,
+        "chat_velocity": 0.2,
+        "visual_clip": 0.2
+    },
+    "thresholds": {
+        "rms_min_db": 1.2,
+        "clamped_max_score": 5.0
+    },
+    "parameters": {
+        "stage1_top_k": 300,
+        "merge_gap_seconds": 78
+    },
+    "prompts": {
+        "llava": "This is a highlight similar to: 'The streamer seems to be engrossed in the content, possibly from a Korean news source, with minimal visible reactions, focusing on displaying the news or social media page they are looking at on their screen.'. Is the content engaging in the same way? Answer YES or NO."
+    }
+}

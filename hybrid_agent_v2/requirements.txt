@@ -1,0 +1,11 @@
+langgraph
+chromadb
+langchain
+langchain-community
+langchain-google-genai
+google-generativeai
+openai-whisper
+tqdm
+moviepy
+python-dotenv
+

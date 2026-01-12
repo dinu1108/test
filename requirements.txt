@@ -10,3 +10,5 @@ torch
 Pillow
 openai-whisper
 safetensors
+scipy
+ImageHash

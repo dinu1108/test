@@ -18,6 +18,7 @@ class PatternLearner:
         self.tmp_dir.mkdir(exist_ok=True)
         self.sr = 8000 # Low SR for faster correlation
         self.ana_sr = 16000 # Analysis SR
+        self.MAX_DIFF_SEC = 5.0 # Allowed drift tolerance
 
     def extract_audio(self, video_path, output_path):
         if not output_path.exists():
@@ -38,60 +39,62 @@ class PatternLearner:
         last_raw_idx = -1
         current_len = 0
         current_start_raw = -1
-
-        # We need a robust correlation. 
-        # Strategy: Iterate chunks of edited audio, find them in raw.
         
         total_chunks = len(y_edit) // chunk_len
-        # Downsample for correlation search if huge? 
-        # For 6h raw, 8khz is 172M samples. float32 ~ 700MB. Fitting in RAM is fine.
-        # Correlation is O(N*M). 
-        # Scipy fftconvolve is O(N log N).
         
-        step = chunk_len
+        print(f"[Learner] Syncing {total_chunks} blocks (Optimized Sequential)...")
         
-        print(f"[Learner] Syncing {total_chunks} blocks...")
-        
-        # Optimization: Scan reduced resolution first? 
-        # Or just search global for first block, then local.
-        
+        # Normalize
         y_raw_norm = (y_raw - np.mean(y_raw)) / (np.std(y_raw) + 1e-6)
         
-        for i in tqdm(range(0, total_chunks, 2), desc="Syncing"): # Skip check for speed
+        # Robust Sequential Sync
+        # We process manually to avoid Windows Multiprocessing issues.
+        # Scipy's FFT is efficient enough with a smart search window.
+        
+        for i in tqdm(range(0, total_chunks, 2), desc="Syncing"):
             s_e = i * chunk_len
             e_e = s_e + chunk_len
             chunk = y_edit[s_e:e_e]
             chunk = (chunk - np.mean(chunk)) / (np.std(chunk) + 1e-6)
             
-            # Local search if we have a lock?
-            # Let's assume sequential for now to speed up.
-            search_start = 0
-            search_end = len(y_raw)
-            
+            # Dynamic Search Window
             if last_raw_idx != -1:
-                # Search window: predicted pos +/- 60s
-                pred = last_raw_idx + (chunk_len * 2) # since we skipped 1
-                search_start = max(0, pred - (60 * self.sr))
-                search_end = min(len(y_raw), pred + (60 * self.sr))
+                pred = last_raw_idx + (chunk_len * 2)
+                win = 30 * self.sr # 30s Window (Widened for robustness)
+                search_start = max(0, pred - win)
+                search_end = min(len(y_raw), pred + win)
                 
-            y_search = y_raw_norm[search_start:search_end]
-            if len(y_search) < len(chunk): continue
+                y_search = y_raw_norm[search_start:search_end]
+                if len(y_search) < len(chunk): continue
+                
+                cc = scipy.signal.correlate(y_search, chunk, mode='valid', method='fft')
+                local_max = np.argmax(cc)
+                global_idx = search_start + local_max
+                
+            else:
+                # Global Search (Only for first lock)
+                # This is the heavy part.
+                cc = scipy.signal.correlate(y_raw_norm, chunk, mode='valid', method='fft')
+                local_max = np.argmax(cc)
+                global_idx = local_max
             
-            cc = scipy.signal.correlate(y_search, chunk, mode='valid', method='fft')
-            local_max = np.argmax(cc)
-            global_idx = search_start + local_max
+            # Check continuity with tolerance
+            expected_pos = last_raw_idx + (chunk_len * 2) if last_raw_idx != -1 else -1
             
-            # Confidence check? CC value?
-            # Assuming ok.
+            # Heuristic: Check if matches prediction
+            is_contiguous = False
+            if last_raw_idx != -1:
+                diff = abs(global_idx - expected_pos)
+                if diff < (self.sr * self.MAX_DIFF_SEC):
+                    is_contiguous = True
             
-            if last_raw_idx != -1 and abs((global_idx - last_raw_idx) - (chunk_len * 2)) < (self.sr * 5.0):
-                # Continuity
+            if is_contiguous:
                 current_len += (chunk_len * 2)
                 last_raw_idx = global_idx
             else:
-                # Break
+                # Segment break
                 if current_start_raw != -1:
-                    intervals.append((current_start_raw/self.sr, (current_start_raw + current_len)/self.sr))
+                     intervals.append((current_start_raw/self.sr, (current_start_raw + current_len)/self.sr))
                 current_start_raw = global_idx
                 current_len = chunk_len
                 last_raw_idx = global_idx
@@ -105,7 +108,8 @@ class PatternLearner:
             intervals.sort()
             curr_s, curr_e = intervals[0]
             for next_s, next_e in intervals[1:]:
-                if next_s <= curr_e + 10.0: # 10s gap merge
+                # Merge if gap < 10s
+                if next_s <= curr_e + 10.0:
                     curr_e = max(curr_e, next_e)
                 else:
                     merged.append((curr_s, curr_e))
@@ -117,8 +121,6 @@ class PatternLearner:
 
     def profile_features(self, raw_wav_full, intervals):
         print("[Learner] Profiling Audio Features (RMS, Slope, Pitch)...")
-        # Load full raw at analysis SR
-        # This might be heavy for 6h? 6h * 16000 * 4 bytes = ~350MB. OK.
         y, sr = librosa.load(str(raw_wav_full), sr=self.ana_sr)
         
         stats = {"rms_max": [], "rms_slope": [], "pitch_var": [], "preroll": [], "postroll": []}
@@ -130,34 +132,23 @@ class PatternLearner:
             
             seg = y[s_idx:e_idx]
             
-            # RMS
             rms = librosa.feature.rms(y=seg, hop_length=2048)[0]
             rms_norm = (rms - rms.min()) / (rms.max() - rms.min() + 1e-6)
             
-            # Peak
             peak_idx = np.argmax(rms_norm)
             peak_time = librosa.frames_to_time(peak_idx, sr=sr, hop_length=2048)
             
-            # Slope
             slopes = np.diff(rms_norm)
-            # Max slope leading to peak?
             win = 10
             p_start = max(0, peak_idx - win)
             local_slope = np.mean(np.maximum(0, slopes[p_start:peak_idx])) if peak_idx > 0 else 0
             
-            # Pitch (F0)
-            # Pyin is slow, use zero crossing variance as proxy or refined harmonic?
-            # Let's use simple pitch proxy: spectral centroid variance? Or ZCR variance.
-            # Librosa piptrack is faster than pyin?
-            # Use ZCR for speed as "Voice/Noise" proxy + Spectral Flatness
-            
-            # Using Zero Crossing Rate as proxy for "Excitement/Noise"
             zcr = librosa.feature.zero_crossing_rate(y=seg)[0]
             zcr_var = np.var(zcr)
             
             stats["rms_max"].append(np.max(rms_norm))
             stats["rms_slope"].append(local_slope)
-            stats["pitch_var"].append(zcr_var) # Using ZCR var as excitement metric
+            stats["pitch_var"].append(zcr_var)
             stats["preroll"].append(peak_time)
             stats["postroll"].append((e-s) - peak_time)
             
@@ -166,7 +157,6 @@ class PatternLearner:
     def llava_persona(self, raw_video, intervals):
         if not intervals: return "Standard Highlight"
         print("[Learner] LLaVA Extracting Persona...")
-        # Sample longest interval
         longest = max(intervals, key=lambda x: x[1]-x[0])
         mid = (longest[0] + longest[1]) / 2
         
@@ -190,7 +180,6 @@ class PatternLearner:
             return
 
         raw_p = raws[0]
-        # Aggregate multiple edits? Just take first for now or loop
         edit_p = edits[0] 
         
         print(f"=== Learning Style from: {center.name} ===")
@@ -205,22 +194,18 @@ class PatternLearner:
             print("Failed to sync.")
             return
             
-        stats = self.profile_features(raw_p, intervals) # Passing video for path, but utilizing wav inside if needed? Actually passed wavs earlier. Fixed logic. 
-        # Actually profile_features loads audio.
-        
+        stats = self.profile_features(raw_p, intervals) 
         persona = self.llava_persona(raw_p, intervals)
         
-        # Calculate Weights
         avg_slope = statistics.mean(stats['rms_slope']) if stats['rms_slope'] else 0
         avg_pitch_var = statistics.mean(stats['pitch_var']) if stats['pitch_var'] else 0
         
-        # Heuristic Weights
         w_rms = 0.3
         w_slope = 0.2
         w_zcr = 0.1
         
         if avg_slope > 0.05: w_slope = 0.4; w_rms = 0.2
-        if avg_pitch_var > 0.02: w_zcr = 0.3 # High variation -> likely screams/talk
+        if avg_pitch_var > 0.02: w_zcr = 0.3
         
         preset = {
             "description": f"Learned from {center.name}. {persona}",
@@ -228,7 +213,7 @@ class PatternLearner:
                 "audio_rms": w_rms,
                 "audio_slope": w_slope,
                 "audio_zcr": w_zcr,
-                "chat_velocity": 0.2, # Default
+                "chat_velocity": 0.2,
                 "visual_clip": 0.2
             },
             "thresholds": {

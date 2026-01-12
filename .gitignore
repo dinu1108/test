@@ -1,13 +1,42 @@
-# Python
+# ==========================================
+# 🐍 Python & Virtual Environments
+# ==========================================
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
 venv/
 venv_310/
-.env
+py310/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Media Files (Aggressive)
+# ==========================================
+# 🔑 Security & Configuration
+# ==========================================
+.env
+api_keys.json
+*.auth
+*.secret
+
+# ==========================================
+# 🎬 Media & Temporary Files (Aggressive)
+# ==========================================
 *.mp4
 *.wav
 *.mp3
@@ -15,23 +44,48 @@ venv_310/
 *.mkv
 *.mov
 *.jpg
+*.jpeg
 *.png
+*.gif
 *.webm
+*.flv
 
-# Project Data Directories
+# ==========================================
+# 📂 Project Data & Model Files
+# ==========================================
 clips/
 processed/
 raw_data/
 training_center/
 learner_tmp/
+chroma_db/
+*.db
+*.sqlite3
+
+# Legacy/Model cache
+*.pkl
+*.pt
+*.pth
+*.h5
+*.ckpt
+
+# ==========================================
+# 🛠️ Editor & System Files
+# ==========================================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
 
 # Editor Temp Files
 concat.txt
 concat_list.txt
 temp_*.mp4
 
-# VS Code
-.vscode/
-
-# Keep presets visible
+# ==========================================
+# 💡 White-listing (Do NOT ignore)
+# ==========================================
 !presets/*.json
+!.gitignore
+!README.md
+!requirements.txt

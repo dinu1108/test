@@ -31,7 +31,7 @@ class Editor:
         print(f"[Editor] Loading Whisper model ('{model_size}')...")
         self.model = whisper.load_model(model_size)
 
-    def smart_merge(self, intervals, gap_threshold=300):
+    def smart_merge(self, intervals, gap_threshold=300, min_duration=0):
         if not intervals: return []
         sorted_ints = sorted(intervals, key=lambda x: x['start'])
         merged = []
@@ -44,9 +44,15 @@ class Editor:
                 # Keep max score
                 curr['score'] = max(curr.get('score', 0), next_item.get('score', 0))
             else:
-                merged.append(curr)
+                # Check min duration before finalizing
+                if (curr['end'] - curr['start']) >= min_duration:
+                    merged.append(curr)
                 curr = next_item.copy()
-        merged.append(curr)
+        
+        if (curr['end'] - curr['start']) >= min_duration:
+            merged.append(curr)
+            
+        print(f"[Editor] Merged down to {len(merged)} clips (Gap: {gap_threshold}s, Min: {min_duration}s)")
         return merged
 
     def generate_thumbnail(self, video, time_sec, text, output_path):
@@ -143,21 +149,23 @@ class Editor:
             except: pass
         return clip
 
-    def create_full_recap(self, video_path, hotspots, style_name="General"):
+    def create_full_recap(self, video_path, hotspots, style_config=None):
+        if style_config is None: style_config = {}
+        style_name = style_config.get('style_name', 'General')
+        params = style_config.get('parameters', {})
+        
         print(f"\n[{self.__class__.__name__}] Production (Style: {style_name})...")
         if not hotspots: return
 
         # 1. Select Best Moment for Hook & Thumbnail
-        # Sort by score descending
-        # Ensure hotspots have 'score', if not default 0
         best_moment = max(hotspots, key=lambda x: x.get('score', 0))
-        # Best time is approx mid of the interval? 
-        # Analyst returns start/end. Let's pick start + 30s as "peak" approximation or just start if short.
-        # Assuming build up is 60s, peak is likely at start + 60s is original.
-        # hotspots -> 'start' = peak - 60. So peak = start + 60.
         peak_time = best_moment['start'] + 60 
         
-        merged = self.smart_merge(hotspots)
+        # Merge with Config Params
+        gap = params.get('merge_gap_seconds', 300)
+        min_dur = params.get('min_clip_duration', 0)
+        
+        merged = self.smart_merge(hotspots, gap_threshold=gap, min_duration=min_dur)
         video_name = os.path.splitext(os.path.basename(video_path))[0]
         temp_files = [] 
         
@@ -174,7 +182,7 @@ class Editor:
             # B. Create Intro Title
             intro = self.create_intro(style_name, video.w, video.h)
             p_intro = os.path.join(self.clips_dir, "intro_title.mp4")
-            intro.write_videofile(p_intro, codec='libx264', audio_codec='aac', preset='ultrafast', logger=None)
+            intro.write_videofile(p_intro, codec='libx264', audio_codec='aac', preset='ultrafast', fps=24, logger=None)
             temp_files.append(p_intro)
             
             # C. Render Clips

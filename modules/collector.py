@@ -25,26 +25,30 @@ class Collector:
             'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
             'outtmpl': f'{self.raw_data_dir}/%(id)s.%(ext)s',
             
-            # 429 Error & Bot Detection Avoidance
-            'ignoreerrors': True,  # 에러 발생 시(자막 등) 무시하고 계속 진행
+            # 429 Error & Bot Detection Avoidance (Headers)
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                'Accept-Language': 'ko-KR,ko;q=0.8,en-US;q=0.5,en;q=0.3',
+            },
+            
+            'ignoreerrors': True,
             'nocheckcertificate': True,
             'quiet': False,
             
-            # Chat/Subtitle settings (Best Effort)
+            # Chat/Subtitle settings
             'writesubtitles': True, 
-            # 'subtitleslangs': ['live_chat'], # 일부 환경에서 에러 유발 가능성 있음, 필요시 주석 해제
-            'writeautomaticsub': False, # 자동 자막은 채팅 분석에 방해될 수 있음
-            'writeinfojson': True, # 메타데이터 저장
+            'writeautomaticsub': False,
+            'writeinfojson': True,
             
-            # 429 방지용 딜레이 (필요시 사용)
-            # 'sleep_interval': 5,
+            # Accelerated Download
+            'external_downloader': 'aria2c',
+            'external_downloader_args': ['-x', '8', '-k', '1M', '--split', '8'],
             
-            # Additional options for reliability and access
-            # Additional options for reliability and access
-            'fragment_retries': 'infinite',
+            # Additional reliability
             'retries': 10,
             
-            # Use local cookies.txt file as requested
+            # Use local cookies.txt file
             'cookiefile': 'cookies.txt',
         }
 

@@ -1,0 +1,12 @@
+# [Simple Mode] 1:1 Match
+# RawURL | EditURL | StyleName
+# https://youtu.be/raw1 | https://youtu.be/edit1 | MyStyle
+
+# [Advanced Mode] M:N Match (Group Matching)
+# Type | URL | GroupName
+#RAW  | https://naver.me/FlcIJupk | Khan
+#RAW  | https://naver.me/5yWJgH1u | Khan
+#EDIT | https://youtu.be/nefLhScHPb0?si=PzQQqf1xHHgKOPLt | Khan
+#EDIT | https://youtu.be/PI_yLeg3SS4?si=6MtUzLsMm6LJMEt8 | Khan
+#EDIT | https://youtu.be/ko7tbzxetGY?si=iisat79K0denhpI4 | Khan
+

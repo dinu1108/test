@@ -1,0 +1,21 @@
+{
+    "weights": {
+        "audio_rms": 0.5,
+        "audio_slope": 0.2,
+        "audio_zcr": 0.2,
+        "chat_velocity": 0.0,
+        "visual_clip": 0.1
+    },
+    "thresholds": {
+        "clamped_max_score": 5.0,
+        "cut_min_score": 3.0
+    },
+    "parameters": {
+        "stage1_top_k": 300,
+        "stage2_top_k": 80,
+        "stage3_top_k": 30
+    },
+    "prompts": {
+        "llava": "Is this a highlight from an AfreecaTV broadcast? Look for star balloons (donations) or large text overlays."
+    }
+}

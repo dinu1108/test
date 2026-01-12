@@ -1,0 +1,22 @@
+{
+    "weights": {
+        "audio_rms": 0.4,
+        "audio_slope": 0.3,
+        "audio_zcr": 0.1,
+        "chat_velocity": 0.3,
+        "visual_clip": 0.15
+    },
+    "thresholds": {
+        "clamped_max_score": 6.0,
+        "cut_min_score": 2.5
+    },
+    "parameters": {
+        "stage1_top_k": 400,
+        "stage2_top_k": 100,
+        "stage3_top_k": 40,
+        "soft_threshold_score": 0.7
+    },
+    "prompts": {
+        "llava": "Is this a highlight moment from a Korean game streamer? Look for intense reactions or funny chat overlay."
+    }
+}
