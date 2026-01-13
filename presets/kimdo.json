@@ -1,0 +1,17 @@
+{
+    "description": "The streamer Kimdo is known for high-energy reactions, sudden shouting, and comedic gaming moments. Highlights usually involve intense gameplay situations, loud laughter, or unique facial expressions during gaming (Dead by Daylight).",
+    "weights": {
+        "audio_rms": 0.2,
+        "audio_slope": 0.2,
+        "audio_zcr": 0.2,
+        "visual_clip": 0.2,
+        "chat_velocity": 0.2
+    },
+    "thresholds": {},
+    "parameters": {
+        "narrative_priority": 3,
+        "smart_merge_gap": 120,
+        "debounce_seconds": 60
+    },
+    "prompts": {}
+}

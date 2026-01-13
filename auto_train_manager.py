@@ -8,6 +8,11 @@ import hashlib
 
 def manage_auto_train():
     # 1. Configuration
+    # 1. Configuration
+    parser = argparse.ArgumentParser(description="Auto Style Training Manager")
+    parser.add_argument("--target", nargs='*', default=[], help="Specific groups to train (e.g. --target kimdo)")
+    args = parser.parse_args()
+
     base_dir = Path(".")
     raw_dir = base_dir / "raw_data"
     edit_dir = base_dir / "processed" 
@@ -23,6 +28,8 @@ def manage_auto_train():
 
     print(f"[{'='*30}]")
     print("[Manager] Auto Style Training Manager (M:N Mode)")
+    if args.target:
+        print(f"[Manager] 🎯 Target Mode: Only processing {args.target}")
     print(f"[Manager] Raw Dir: {raw_dir}")
     print(f"[Manager] Edit Dir: {edit_dir}")
     print(f"[Manager] Python Path: {sys.executable}") # 현재 사용 중인 파이썬 확인용
@@ -131,6 +138,13 @@ def manage_auto_train():
                         print(f"  ✅ MATCHED: {e_file.name} <==> {r.name}")
                         break
 
+    # [TARGET FILTER]
+    if args.target:
+        print(f"\n[Manager] 🎯 Applying Filter: Keeping only {args.target}")
+        before_count = len(tasks)
+        tasks = [t for t in tasks if t['group'] in args.target]
+        print(f"  Tasks reduced from {before_count} to {len(tasks)}")
+
     if not tasks:
         print("\n[Manager] No valid tasks found.")
         return
@@ -175,17 +189,24 @@ def manage_auto_train():
             groups_to_aggregate.add(t['group'])
             
     for group in groups_to_aggregate:
-        # Find all JSONs starting with GroupName_
-        pattern = f"{group}_*.json"
-        found = list(presets_dir.glob(pattern))
+        # 1. Prepare Target Directory
+        group_dir = presets_dir / group
+        group_dir.mkdir(exist_ok=True)
         
+        # Find all JSONs starting with GroupName_ in the root presets folder (old style)
+        found = list(presets_dir.glob(f"{group}_*.json"))
+        if not found:
+            # If nothing in root, maybe they are already in the group dir? 
+            # (In case of re-running)
+            found = list(group_dir.glob(f"{group}_*.json"))
+            
         if not found: continue
         
-        print(f"  Grouping {len(found)} styles for '{group}'...")
+        print(f"  Grouping {len(found)} styles for '{group}' into subfolder...")
         
-        total_weights = defaultdict(float)
-        total_params = defaultdict(float)
-        descriptions = []
+        max_weights = defaultdict(float)
+        max_params = defaultdict(float)
+        library_data = []
         prompts = []
         
         count = 0
@@ -193,17 +214,24 @@ def manage_auto_train():
             try:
                 with open(p_file, 'r', encoding='utf-8') as f:
                     data = json.load(f)
+                
+                # Add to library (Training History)
+                library_item = {
+                    "source": p_file.stem,
+                    "date": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(p_file.stat().st_mtime)),
+                    "data": data
+                }
+                library_data.append(library_item)
                     
-                # Sum weights
+                # Max weights
                 for k, v in data.get('weights', {}).items():
-                    total_weights[k] += v
+                    max_weights[k] = max(max_weights[k], v)
                     
-                # Sum numeric params
+                # Max numeric params
                 for k, v in data.get('parameters', {}).items():
                     if isinstance(v, (int, float)):
-                        total_params[k] += v       
+                        max_params[k] = max(max_params[k], v)       
                         
-                if 'description' in data: descriptions.append(data['description'])
                 if 'llava' in data.get('prompts', {}): prompts.append(data['prompts']['llava'])
                 
                 count += 1
@@ -211,27 +239,64 @@ def manage_auto_train():
             
         if count == 0: continue
         
-        # Average
-        avg_weights = {k: round(v/count, 2) for k, v in total_weights.items()}
-        avg_params = {k: int(v/count) for k, v in total_params.items()}
-        
-        # Merge Prompt (Use longest or most common? Just use first for now)
+        # Use Max values directly
+        merged_weights = dict(max_weights)
+        merged_params = {k: int(v) if k.endswith('seconds') or k.endswith('gap') else v for k, v in max_params.items()}
         final_prompt = prompts[0] if prompts else ""
-        final_desc = f"Aggregated Style from {count} videos in group '{group}'."
+        
+        # Preserve existing description from the FINAL preset if it exists
+        final_out_path = group_dir / f"{group}.json"
+        existing_desc = None
+        if final_out_path.exists():
+            try:
+                with open(final_out_path, 'r', encoding='utf-8') as f:
+                    existing = json.load(f)
+                    existing_desc = existing.get('description')
+            except: pass
+            
+        final_desc = existing_desc if existing_desc else f"Aggregated Style from {count} videos in group '{group}'."
         
         merged_preset = {
             "description": final_desc,
-            "weights": avg_weights,
-            "thresholds": {"rms_min_db": 1.2, "clamped_max_score": 5.0}, # Defaults
-            "parameters": avg_params,
+            "weights": merged_weights,
+            "thresholds": {"rms_min_db": 1.2, "clamped_max_score": 5.0}, 
+            "parameters": merged_params,
             "prompts": {"llava": final_prompt}
         }
         
-        out_path = presets_dir / f"{group}.json"
-        with open(out_path, 'w', encoding='utf-8') as f:
-            json.dump(merged_preset, f, indent=4)
+        # 2. Save Aggregated Preset
+        with open(final_out_path, 'w', encoding='utf-8') as f:
+            json.dump(merged_preset, f, indent=4, ensure_ascii=False)
             
-        print(f"  ✅ Created Group Preset: {out_path.name}")
+        # 3. Save/Update Library
+        lib_path = group_dir / f"{group}_library.json"
+        existing_lib = []
+        if lib_path.exists():
+            try:
+                with open(lib_path, 'r', encoding='utf-8') as f:
+                    existing_lib = json.load(f)
+            except: pass
+            
+        # Merge old library with new (prevent duplicates based on source name)
+        seen_sources = {item['source'] for item in existing_lib}
+        for item in library_data:
+            if item['source'] not in seen_sources:
+                existing_lib.append(item)
+                
+        with open(lib_path, 'w', encoding='utf-8') as f:
+            json.dump(existing_lib, f, indent=4, ensure_ascii=False)
+
+        # 4. Clean Up (Move originals to history folder)
+        history_dir = group_dir / "history"
+        history_dir.mkdir(exist_ok=True)
+        for p_file in found:
+            try:
+                target = history_dir / p_file.name
+                if target.exists(): target.unlink()
+                p_file.rename(target)
+            except: pass
+            
+        print(f"  ✅ Reorganized Style: {group}/ (Final + Lib + {len(found)} History)")
 
 if __name__ == "__main__":
     manage_auto_train()

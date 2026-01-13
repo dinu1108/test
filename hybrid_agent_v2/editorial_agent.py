@@ -2,7 +2,9 @@ from langgraph.graph import StateGraph, END
 from typing import TypedDict, List
 from .knowledge_base import VideoKnowledgeBase
 from .llm_interface import LLMInterface
+from presets.factory_config import FactoryConfig
 import math
+import concurrent.futures
 
 class AgentState(TypedDict):
     video_path: str
@@ -24,11 +26,24 @@ class EditorialAgent:
         builder.add_node("human_review", self.human_review)
         
         builder.set_entry_point("scan")
-        builder.add_edge("scan", "search_narrative_start")
+        
+        # [CONDITIONAL EDGE]
+        builder.add_conditional_edges(
+            "scan",
+            self.check_candidates,
+            {"continue": "search_narrative_start", "end": END}
+        )
+        
         builder.add_edge("search_narrative_start", "human_review")
         builder.add_edge("human_review", END)
         
         return builder.compile()
+
+    def check_candidates(self, state: AgentState):
+        if not state['highlights']:
+            print("[Agent] 🛑 No highlights found. Stopping workflow.")
+            return "end"
+        return "continue"
 
     # ... (scan_candidates logic is above) ...
 
@@ -44,6 +59,15 @@ class EditorialAgent:
         print(f"{'ID':<4} | {'Start':<8} | {'End':<8} | {'Duration':<6} | {'Summary'}")
         print("-" * 60)
         
+        if not cuts:
+            print("   (No cuts available)")
+        
+        # [Auto-Approve Check]
+        if FactoryConfig.AUTO_APPROVE:
+            print(f"\n[Agent] 🤖 Auto-Approve Enabled (FactoryConfig). Skipping human review.")
+            print("[Agent] ✅ Plan Approved automatically. Proceeding to Render.")
+            return {"final_cuts": cuts}
+        
         for i, cut in enumerate(cuts):
             dur = cut['end'] - cut['start']
             # Limit summary length
@@ -52,17 +76,25 @@ class EditorialAgent:
             
         print("="*60)
         
-        while True:
-            choice = input("\n[User Check] Proceed with this plan? (y/n): ").strip().lower()
-            if choice == 'y':
-                print("[Agent] ✅ Plan Approved. Proceeding to Render.")
-                return {"final_cuts": cuts}
-            elif choice == 'n':
-                print("[Agent] 🛑 Plan Aborted by User.")
-                # We could implement editing logic here, but for now abort.
-                return {"final_cuts": []} # Empty list stops rendering
-            else:
-                print("Please type 'y' or 'n'.")
+        # Non-blocking for automation context? 
+        # For now, keep interactive.
+        try:
+            while True:
+                # If running in automation manager, we might want to auto-approve.
+                # But here we assume direct usage.
+                choice = input("\n[User Check] Proceed with this plan? (y/n): ").strip().lower()
+                if choice == 'y':
+                    print("[Agent] ✅ Plan Approved. Proceeding to Render.")
+                    return {"final_cuts": cuts}
+                elif choice == 'n':
+                    print("[Agent] 🛑 Plan Aborted by User.")
+                    # We could implement editing logic here, but for now abort.
+                    return {"final_cuts": []} # Empty list stops rendering
+                else:
+                    print("Please type 'y' or 'n'.")
+        except EOFError:
+             print("[Agent] EOF detected, auto-aborting.")
+             return {"final_cuts": []}
 
     def scan_candidates(self, state: AgentState):
         """
@@ -95,12 +127,11 @@ class EditorialAgent:
         top_k_indices = indices[:20] # Get Top 20 peaks
         
         candidates = []
+        video_id = Path(video_path).stem
+        
         for i in top_k_indices:
             t = times[i]
             s = scores[i]
-            # Use Whisper transcript from KB to get text at this time?
-            # We can query KB for text at 't'.
-            video_id = Path(video_path).stem
             # Fetch small context around peak to identify 'What is this?'
             # Just get 1 segment at t
             context = self.kb.get_context(video_id, t, t+5)
@@ -113,77 +144,123 @@ class EditorialAgent:
         
         # Debounce/Merge close candidates (Local logic)
         unique = []
+        debounce_limit = FactoryConfig.DEBOUNCE_SECONDS # [EXTERNAL CONFIG]
+        
         if candidates:
             last = candidates[0]
             unique.append(last)
             for c in candidates[1:]:
-                if c['time'] - last['time'] > 60: # 1 minute debounce
+                if c['time'] - last['time'] > debounce_limit: 
                     unique.append(c)
                     last = c
         
         print(f"[Agent] ✅ Found {len(unique)} High-Probability Candidates (Local V1 filtered).")
         return {"highlights": unique}
 
+    def _process_single_candidate(self, h, video_id):
+        """
+        Helper function for parallel processing.
+        Performs RAG Query and Gemini Analysis for a single candidate.
+        """
+        peak_time = h['time']
+        # 1. RAG Query (Lookback 5m)
+        context_start = max(0, peak_time - 300)
+        context = self.kb.get_context(video_id, context_start, peak_time + 30)
+        
+        if not context:
+            return None # Skip
+            
+        # 2. Gemini Analysis (Returns JSON dict)
+        result = self.llm.analyze_story_start(
+            event_description=h['text'],
+            transcript_segment=context
+        )
+        
+        return {
+            "peak_time": peak_time,
+            "text": h['text'],
+            "result": result
+        }
+
     def search_narrative_start(self, state: AgentState):
         """
         Step 2: Narrative Lookback Node.
         Logic: RAG Query -> Gemini Analysis (JSON) -> Filtering & Smart Merge
+        [Now Parallelized with ThreadPoolExecutor]
         """
         highlights = state['highlights']
         video_path = state['video_path']
         video_id = Path(video_path).stem
         final_cuts = []
         
-        print(f"[Agent] 🕵️ Searching Narrative Start for {len(highlights)} candidates...")
+        print(f"[Agent] 🕵️ Searching Narrative Start for {len(highlights)} candidates (Parallel)...")
         
-        for h in highlights:
-            peak_time = h['time']
-            # 1. RAG Query (Lookback 5m)
-            context_start = max(0, peak_time - 300)
-            context = self.kb.get_context(video_id, context_start, peak_time + 30)
+        # 1. Parallel Execution
+        processed_results = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            future_to_h = {
+                executor.submit(self._process_single_candidate, h, video_id): h 
+                for h in highlights
+            }
             
-            if not context:
-                print(f"    [Skip] No context found for {peak_time}s")
-                continue
+            completed_count = 0
+            for future in concurrent.futures.as_completed(future_to_h):
+                completed_count += 1
+                try:
+                    res = future.result()
+                    if res:
+                        processed_results.append(res)
+                except Exception as e:
+                    print(f"    ⚠️ Task failed: {e}")
                 
-            # 2. Gemini Analysis (Returns JSON dict)
-            result = self.llm.analyze_story_start(
-                event_description=h['text'],
-                transcript_segment=context
-            )
+                # Simple progress indicator
+                print(f"    ... {completed_count}/{len(highlights)} processed", end='\r')
+        
+        print() # Newline
+        
+        # Sort by peak_time to ensure logical order for merging
+        processed_results.sort(key=lambda x: x['peak_time'])
+
+        # 2. Filtering & Smart Merge (Sequential)
+        priority_threshold = FactoryConfig.NARRATIVE_PRIORITY_THRESHOLD # [EXTERNAL CONFIG]
+        merge_gap = FactoryConfig.SMART_MERGE_GAP # [EXTERNAL CONFIG]
+
+        for item in processed_results:
+            result = item['result']
+            peak_time = item['peak_time']
+            text = item['text']
             
-            # 3. Parse & Filter
             start_time = result.get('start', -1)
             priority = result.get('priority', 0)
             reason = result.get('reason', 'Unknown')
             
-            if priority < 3: # "Context-less cuts are discarded" (User Rule)
-                print(f"    🗑️ Discarded (Priority {priority}): {reason}")
+            if priority < priority_threshold: 
+                print(f"    🗑️ Discarded (Priority {priority}<{priority_threshold}): {reason}")
                 continue
             
             if start_time > 0 and start_time < peak_time:
-                print(f"    ✅ Narrative Found (P{priority}): {start_time:.1f}s -> {peak_time:.1f}s | {reason}")
+                # print(f"    ✅ Narrative Found (P{priority}): {start_time:.1f}s -> {peak_time:.1f}s | {reason}")
                 start = start_time
             else:
                 start = max(0, peak_time - 30)
                 
             end = peak_time + 20
             
-            # 4. Smart Merge (Local check against previous cut)
+            # Smart Merge check
             if final_cuts:
                 last_cut = final_cuts[-1]
-                # If gap is small (< 120s), merge
-                if start - last_cut['end'] < 120:
-                    print(f"    🔗 Smart Merging with previous clip (Gap < 2m)")
+                # If gap is small, merge
+                if start - last_cut['end'] < merge_gap:
+                    print(f"    🔗 Smart Merging with previous clip (Gap < {merge_gap}s)")
                     last_cut['end'] = max(last_cut['end'], end)
-                    # Append summary/reason?
-                    last_cut['summary'] += f" + {h['text']}"
+                    last_cut['summary'] += f" + {text}"
                     continue
 
+            print(f"    ✅ Added Clip: {start:.1f}s ~ {end:.1f}s (P{priority})")
             final_cuts.append({
                 "start": start, 
                 "end": end, 
-                "summary": h['text'], 
+                "summary": text, 
                 "reason": reason,
                 "priority": priority
             })
@@ -197,4 +274,5 @@ class EditorialAgent:
         # 2. Run Flow
         input_state = {"video_path": video_path, "highlights": [], "current_idx": 0, "final_cuts": []}
         result = self.workflow.invoke(input_state)
-        return result['final_cuts']
+        # Handle conditional end
+        return result.get('final_cuts', [])

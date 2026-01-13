@@ -1,0 +1,21 @@
+{
+    "description": "Learned from ralo_[랄로] 쏴라!!!!!!!!!! (_z0UZNcB0Nk). The streamer's vibe appears to be intense, as indicated by his focused facial expression and the presence of a game interface showing that they are playing a video game with vehicles on a snowy map.",
+    "weights": {
+        "audio_rms": 0.1,
+        "audio_slope": 0.7,
+        "audio_zcr": 0.1,
+        "chat_velocity": 0.2,
+        "visual_clip": 0.2
+    },
+    "thresholds": {
+        "rms_min_db": 0.5,
+        "clamped_max_score": 5.0
+    },
+    "parameters": {
+        "stage1_top_k": 300,
+        "merge_gap_seconds": 40
+    },
+    "prompts": {
+        "llava": "This is a highlight similar to: 'The streamer's vibe appears to be intense, as indicated by his focused facial expression and the presence of a game interface showing that they are playing a video game with vehicles on a snowy map.'. Is the content engaging? Answer YES or NO."
+    }
+}

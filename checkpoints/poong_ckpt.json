@@ -1,0 +1,482 @@
+[
+  {
+    "id": 0,
+    "emotion_intensity": 0.6,
+    "info_density": 0.7,
+    "narrative_payoff": 0.5,
+    "context_break": 0.2,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 1,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.7,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 2,
+    "emotion_intensity": 0.6,
+    "info_density": 0.7,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 3,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.6,
+    "context_break": 0.2,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 4,
+    "emotion_intensity": 0.8,
+    "info_density": 0.9,
+    "narrative_payoff": 0.7,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 5,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.7,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 6,
+    "emotion_intensity": 0.6,
+    "info_density": 0.7,
+    "narrative_payoff": 0.5,
+    "context_break": 0.2,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 7,
+    "emotion_intensity": 0.8,
+    "info_density": 0.8,
+    "narrative_payoff": 0.7,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 8,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 9,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 10,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 11,
+    "emotion_intensity": 0.6,
+    "info_density": 0.7,
+    "narrative_payoff": 0.5,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 12,
+    "emotion_intensity": 0.5,
+    "info_density": 0.7,
+    "narrative_payoff": 0.4,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 13,
+    "emotion_intensity": 0.5,
+    "info_density": 0.7,
+    "narrative_payoff": 0.4,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 14,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 15,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 16,
+    "emotion_intensity": 0.6,
+    "info_density": 0.7,
+    "narrative_payoff": 0.5,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 17,
+    "emotion_intensity": 0.6,
+    "info_density": 0.7,
+    "narrative_payoff": 0.5,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 18,
+    "emotion_intensity": 0.6,
+    "info_density": 0.7,
+    "narrative_payoff": 0.5,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 19,
+    "emotion_intensity": 0.3,
+    "info_density": 0.4,
+    "narrative_payoff": 0.2,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 20,
+    "emotion_intensity": 0.6,
+    "info_density": 0.7,
+    "narrative_payoff": 0.5,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 21,
+    "emotion_intensity": 0.5,
+    "info_density": 0.6,
+    "narrative_payoff": 0.4,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 22,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 23,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 24,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 25,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 26,
+    "emotion_intensity": 0.6,
+    "info_density": 0.7,
+    "narrative_payoff": 0.5,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 27,
+    "emotion_intensity": 0.8,
+    "info_density": 0.9,
+    "narrative_payoff": 0.7,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 28,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 29,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 30,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 31,
+    "emotion_intensity": 0.6,
+    "info_density": 0.7,
+    "narrative_payoff": 0.5,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 32,
+    "emotion_intensity": 0.6,
+    "info_density": 0.7,
+    "narrative_payoff": 0.5,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 33,
+    "emotion_intensity": 0.7,
+    "info_density": 0.7,
+    "narrative_payoff": 0.7,
+    "context_break": 0.2,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 34,
+    "emotion_intensity": 0.7,
+    "info_density": 0.7,
+    "narrative_payoff": 0.7,
+    "context_break": 0.2,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 35,
+    "emotion_intensity": 0.7,
+    "info_density": 0.7,
+    "narrative_payoff": 0.7,
+    "context_break": 0.2,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 36,
+    "emotion_intensity": 0.7,
+    "info_density": 0.7,
+    "narrative_payoff": 0.7,
+    "context_break": 0.2,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 37,
+    "emotion_intensity": 0.7,
+    "info_density": 0.7,
+    "narrative_payoff": 0.7,
+    "context_break": 0.2,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 38,
+    "emotion_intensity": 0.6,
+    "info_density": 0.6,
+    "narrative_payoff": 0.6,
+    "context_break": 0.3,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 39,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 40,
+    "emotion_intensity": 0.6,
+    "info_density": 0.7,
+    "narrative_payoff": 0.5,
+    "context_break": 0.2,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 41,
+    "emotion_intensity": 0.5,
+    "info_density": 0.7,
+    "narrative_payoff": 0.4,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 42,
+    "emotion_intensity": 0.5,
+    "info_density": 0.7,
+    "narrative_payoff": 0.4,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 43,
+    "emotion_intensity": 0.5,
+    "info_density": 0.7,
+    "narrative_payoff": 0.4,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 44,
+    "emotion_intensity": 0.4,
+    "info_density": 0.6,
+    "narrative_payoff": 0.3,
+    "context_break": 0.2,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 45,
+    "emotion_intensity": 0.8,
+    "info_density": 0.7,
+    "narrative_payoff": 0.7,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 46,
+    "emotion_intensity": 0.8,
+    "info_density": 0.7,
+    "narrative_payoff": 0.7,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 47,
+    "emotion_intensity": 0.8,
+    "info_density": 0.7,
+    "narrative_payoff": 0.7,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 48,
+    "emotion_intensity": 0.7,
+    "info_density": 0.6,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 49,
+    "emotion_intensity": 0.7,
+    "info_density": 0.6,
+    "narrative_payoff": 0.5,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 50,
+    "emotion_intensity": 0.7,
+    "info_density": 0.6,
+    "narrative_payoff": 0.5,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 51,
+    "emotion_intensity": 0.7,
+    "info_density": 0.6,
+    "narrative_payoff": 0.5,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 52,
+    "emotion_intensity": 0.6,
+    "info_density": 0.7,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 53,
+    "emotion_intensity": 0.6,
+    "info_density": 0.7,
+    "narrative_payoff": 0.6,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 54,
+    "emotion_intensity": 0.5,
+    "info_density": 0.8,
+    "narrative_payoff": 0.7,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 55,
+    "emotion_intensity": 0.6,
+    "info_density": 0.7,
+    "narrative_payoff": 0.5,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 56,
+    "emotion_intensity": 0.6,
+    "info_density": 0.7,
+    "narrative_payoff": 0.5,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 57,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.7,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 58,
+    "emotion_intensity": 0.7,
+    "info_density": 0.8,
+    "narrative_payoff": 0.7,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  },
+  {
+    "id": 59,
+    "emotion_intensity": 0.9,
+    "info_density": 0.8,
+    "narrative_payoff": 0.7,
+    "context_break": 0.1,
+    "is_unnecessary": 0
+  }
+]

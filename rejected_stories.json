@@ -1,0 +1,101 @@
+[
+  {
+    "id": 16,
+    "title": "48시간 야근?!",
+    "start_time": 13500.0,
+    "end_time": 14400.0,
+    "narrative_score": 4.0,
+    "summary": "이어진 야근에 지쳐버린 주인공. 탈출을 포기하고 공장일에 몰두하지만, 극심한 피로와 스트레스에 시달린다.",
+    "is_boring": true,
+    "rejection_reason": "단순 노동 반복, 서사적 가치 미미",
+    "timestamp": "2026-01-13 19:45:29"
+  },
+  {
+    "id": 7,
+    "title": "버려진 공장, 그리고 새로운 길을 찾아서",
+    "start_time": 2700.0,
+    "end_time": 3120.0,
+    "narrative_score": 5.5,
+    "summary": "예상치 못한 공장 폐쇄로 난감해하고, 새로운 해결책 모색. 과거 '마쌍카' 게임 경험을 회상하며 게임 진행 방향에 대한 고민. 시청자들과 소통하며 앞으로의 방송 계획 논의.",
+    "is_boring": true,
+    "rejection_reason": "노동의 반복, 서사적 가치 미미",
+    "timestamp": "2026-01-13 20:59:31"
+  },
+  {
+    "id": 8,
+    "title": "감옥행, 그리고 무의미한 시간 보내기",
+    "start_time": 3120.0,
+    "end_time": 3600.0,
+    "narrative_score": 4.0,
+    "summary": "벌금 미납으로 인해 감옥에 수감되는 상황 발생. 감옥 내 생활을 묘사하며 답답함과 무력감을 표출. 14시간 동안 감옥에서 시간을 보내야 하는 상황에 대한 불만을 토로하며 자포자기.",
+    "is_boring": true,
+    "rejection_reason": "단순 노동 반복, 서사적 가치 미미",
+    "timestamp": "2026-01-13 20:59:31"
+  },
+  {
+    "id": 9,
+    "title": "출소 후, 새로운 컨텐츠를 향한 모색",
+    "start_time": 3600.0,
+    "end_time": 4080.0,
+    "narrative_score": 5.0,
+    "summary": "롤, 타르코프 등 다른 게임 언급. 99년도 공장 근무 경험담, 군대 이야기 등 다양한 주제로 잡담 진행. 게임에 대한 흥미를 잃고 새로운 컨텐츠를 찾아 나서는 여정 암시.",
+    "is_boring": true,
+    "rejection_reason": "단순 노동 반복, 서사적 가치 미미",
+    "timestamp": "2026-01-13 20:59:31"
+  },
+  {
+    "id": 11,
+    "title": "업무 반복 및 고뇌",
+    "start_time": 9000.0,
+    "end_time": 10800.0,
+    "narrative_score": 5.0,
+    "summary": "단순 작업 반복에 지쳐 다른 방법을 모색",
+    "is_boring": true,
+    "rejection_reason": "단순 노동 반복, 서사적 가치 미미",
+    "timestamp": "2026-01-13 21:02:16"
+  },
+  {
+    "id": 19,
+    "title": "수감 생활",
+    "start_time": 21600.0,
+    "end_time": 23400.0,
+    "narrative_score": 7.0,
+    "summary": "교도소에서 밥을 먹고 잠을 자는 등 단조로운 일상을 보낸다.",
+    "is_boring": true,
+    "rejection_reason": "단순 노동 반복, 서사적 가치 미미",
+    "timestamp": "2026-01-13 21:02:16"
+  },
+  {
+    "id": 22,
+    "title": "기약없는 기다림",
+    "start_time": 26960.0,
+    "end_time": 28800.0,
+    "narrative_score": 5.0,
+    "summary": "출소를 기다리며 게임을 종료한다.",
+    "is_boring": true,
+    "rejection_reason": "단순 노동 반복, 서사적 가치 미미",
+    "timestamp": "2026-01-13 21:02:16"
+  },
+  {
+    "id": 4,
+    "title": "카페 메일 기능 삭제에 대한 불만",
+    "start_time": 510.0,
+    "end_time": 600.0,
+    "narrative_score": 2.0,
+    "summary": "네이버 카페에서 메일 보내는 기능이 없어진 것에 대한 불만 토로",
+    "is_boring": true,
+    "rejection_reason": "단순 불만 토로",
+    "timestamp": "2026-01-13 21:06:00"
+  },
+  {
+    "id": 33,
+    "title": "감옥의 일상",
+    "start_time": 38920.0,
+    "end_time": 40320.0,
+    "narrative_score": 2.0,
+    "summary": "감옥에서 일상생활을 한다.",
+    "is_boring": true,
+    "rejection_reason": "단순노동 반복, 서사적 가치 미미",
+    "timestamp": "2026-01-13 21:06:00"
+  }
+]

@@ -1,0 +1,21 @@
+{
+    "description": "Learned from poong_[풍월량] '압도적 긍정적 평가!' 중독성 미쳤다는 우주선으로 암석 파괴하는 그 게임 [우주 암석 파괴자] (MFiL-NBcenQ). The streamer seems to be making a dramatic face and might be reacting intensely while playing Dead by Daylight, which suggests an engaging or suspenseful vibe.",
+    "weights": {
+        "audio_rms": 0.1,
+        "audio_slope": 0.7,
+        "audio_zcr": 0.1,
+        "chat_velocity": 0.2,
+        "visual_clip": 0.2
+    },
+    "thresholds": {
+        "rms_min_db": 0.5,
+        "clamped_max_score": 5.0
+    },
+    "parameters": {
+        "stage1_top_k": 300,
+        "merge_gap_seconds": 40
+    },
+    "prompts": {
+        "llava": "This is a highlight similar to: 'The streamer seems to be making a dramatic face and might be reacting intensely while playing Dead by Daylight, which suggests an engaging or suspenseful vibe.'. Is the content engaging? Answer YES or NO."
+    }
+}

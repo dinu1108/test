@@ -1,0 +1,25 @@
+{
+    "description": "Aggregated Style for [풍월량] (Poong). Focuses on high-energy reactions and suspenseful gameplay moments found in Dead by Daylight and Horror/Variety games.",
+    "weights": {
+        "audio_rms": 0.1,
+        "audio_slope": 0.7,
+        "audio_zcr": 0.1,
+        "visual_clip": 0.2,
+        "chat_velocity": 0.2
+    },
+    "thresholds": {
+        "rms_min_db": 0.5,
+        "clamped_max_score": 5.0,
+        "golden_threshold": 0.55
+    },
+    "parameters": {
+        "merge_gap_seconds": 40,
+        "preroll": 60,
+        "postroll": 20,
+        "smart_merge_gap": 120.0,
+        "auto_approve": true
+    },
+    "prompts": {
+        "llava": "Is the streamer reacting intensely or showing a high-energy focused face? Answer YES or NO."
+    }
+}

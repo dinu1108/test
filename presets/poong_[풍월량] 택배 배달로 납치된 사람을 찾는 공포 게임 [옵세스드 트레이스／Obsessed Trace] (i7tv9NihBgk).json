@@ -1,0 +1,21 @@
+{
+    "description": "Learned from poong_[풍월량] 택배 배달로 납치된 사람을 찾는 공포 게임 [옵세스드 트레이스／Obsessed Trace] (i7tv9NihBgk). The streamer appears to be engaged and focused on the game, displaying a high-energy vibe as he plays \"Dead by Daylight.\"",
+    "weights": {
+        "audio_rms": 0.1,
+        "audio_slope": 0.7,
+        "audio_zcr": 0.1,
+        "chat_velocity": 0.2,
+        "visual_clip": 0.2
+    },
+    "thresholds": {
+        "rms_min_db": 0.5,
+        "clamped_max_score": 5.0
+    },
+    "parameters": {
+        "stage1_top_k": 300,
+        "merge_gap_seconds": 40
+    },
+    "prompts": {
+        "llava": "This is a highlight similar to: 'The streamer appears to be engaged and focused on the game, displaying a high-energy vibe as he plays \"Dead by Daylight.\"'. Is the content engaging? Answer YES or NO."
+    }
+}

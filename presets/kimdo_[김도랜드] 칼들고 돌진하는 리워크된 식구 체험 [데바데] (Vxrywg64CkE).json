@@ -1,0 +1,21 @@
+{
+    "description": "Learned from kimdo_[김도랜드] 칼들고 돌진하는 리워크된 식구 체험 [데바데] (Vxrywg64CkE). The image appears to show a person with an intense and focused facial expression during what seems to be a live gaming stream. It is not possible to hear or determine the type of reaction the streamer is having without listening to the audio, but based on the image alone, the 'Vibe' could be described as intense or engaged.",
+    "weights": {
+        "audio_rms": 0.1,
+        "audio_slope": 0.7,
+        "audio_zcr": 0.1,
+        "chat_velocity": 0.2,
+        "visual_clip": 0.2
+    },
+    "thresholds": {
+        "rms_min_db": 0.5,
+        "clamped_max_score": 5.0
+    },
+    "parameters": {
+        "stage1_top_k": 300,
+        "merge_gap_seconds": 40
+    },
+    "prompts": {
+        "llava": "This is a highlight similar to: 'The image appears to show a person with an intense and focused facial expression during what seems to be a live gaming stream. It is not possible to hear or determine the type of reaction the streamer is having without listening to the audio, but based on the image alone, the 'Vibe' could be described as intense or engaged.'. Is the content engaging? Answer YES or NO."
+    }
+}
